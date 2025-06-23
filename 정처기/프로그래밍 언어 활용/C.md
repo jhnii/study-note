@@ -47,3 +47,177 @@
 | `int isspace(int c);`               | `c`가 공백 문자인지 확인합니다. (`' ', '\f', '\n', '\r', '\t', '\v'`) |
 | `int isgraph(int c);`               | `c`가 공백을 제외한 출력 가능한 문자인지 확인합니다.                |
  
+
+---
+
+
+## 포인터
+
+포인터는 다른 변수의 메모리 주소를 저장하는 변수입니다. C언어의 강력한 기능 중 하나로, 메모리에 직접 접근하여 데이터를 조작할 수 있게 해줍니다.
+
+### 포인터 선언 및 기본 사용법
+
+포인터는 가리키고자 하는 변수의 자료형 뒤에 `*`를 붙여 선언합니다. 변수의 주소를 얻기 위해서는 `&`(주소 연산자)를 사용하고, 포인터가 가리키는 값에 접근하기 위해서는 `*`(역참조 연산자)를 사용합니다.
+
+**예시:**
+```c
+#include <stdio.h>
+
+int main() {
+    int var = 20;   // 실제 변수
+    int *ip;        // 정수형 포인터 선언
+
+    ip = &var;      // var 변수의 주소를 포인터 ip에 저장
+
+    printf("var 변수의 주소: %p\n", &var);
+    printf("ip에 저장된 주소: %p\n", ip);
+    printf("ip가 가리키는 값: %d\n", *ip);
+
+    return 0;
+}
+```
+
+### 포인터와 배열
+
+배열의 이름은 그 자체로 배열의 첫 번째 요소의 주소를 가리키는 포인터 상수입니다. 따라서 포인터를 사용하여 배열의 요소에 접근할 수 있습니다.
+
+**예시:**
+```c
+#include <stdio.h>
+
+int main() {
+    int arr[5] = {10, 20, 30, 40, 50};
+    int *p = arr; // 배열 이름은 첫 번째 요소의 주소와 같음 (p = &arr[0]; 과 동일)
+
+    printf("배열의 요소 접근:\n");
+    for (int i = 0; i < 5; i++) {
+        printf("*(p + %d): %d\n", i, *(p + i));
+    }
+
+    return 0;
+}
+```
+
+### 포인터와 함수 (Call by Reference)
+
+함수에 포인터를 인자로 전달하면, 함수 내에서 원래 변수의 값을 변경할 수 있습니다. 이를 'Call by Reference'라고 합니다.
+
+**예시:**
+```c
+#include <stdio.h>
+
+void swap(int *x, int *y) {
+    int temp;
+    temp = *x; // x가 가리키는 값을 temp에 저장
+    *x = *y;   // y가 가리키는 값을 x가 가리키는 곳에 저장
+    *y = temp; // temp 값을 y가 가리키는 곳에 저장
+}
+
+int main() {
+    int a = 100;
+    int b = 200;
+
+    printf("교환 전: a = %d, b = %d\n", a, b);
+    swap(&a, &b); // a와 b의 주소를 전달
+    printf("교환 후: a = %d, b = %d\n", a, b);
+
+    return 0;
+}
+```
+
+### 동적 메모리 할당
+
+프로그램 실행 중에 필요한 만큼의 메모리를 할당받아 사용할 수 있습니다. `malloc`, `calloc` 함수를 사용하며, 사용이 끝난 메모리는 `free` 함수를 통해 반드시 해제해야 합니다.
+
+**예시:**
+```c
+#include <stdio.h>
+#include <stdlib.h> // malloc, free 함수를 위해 필요
+
+int main() {
+    int *ptr;
+    int n = 5;
+
+    // int 5개 크기만큼 동적 메모리 할당
+    ptr = (int*)malloc(n * sizeof(int));
+
+    if (ptr == NULL) {
+        printf("메모리 할당 실패\n");
+        return 1;
+    }
+
+    for (int i = 0; i < n; i++) {
+        ptr[i] = i + 1;
+    }
+
+    printf("동적 할당된 배열 요소:\n");
+    for (int i = 0; i < n; i++) {
+        printf("%d ", ptr[i]);
+    }
+    printf("\n");
+
+    // 할당된 메모리 해제
+    free(ptr);
+
+    return 0;
+}
+```
+
+### 이중 포인터 (Pointer to Pointer)
+
+이중 포인터는 다른 포인터의 주소를 저장하는 포인터입니다. 포인터 자체를 함수 내에서 변경해야 할 때 유용하게 사용됩니다.
+
+**예시:**
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+void allocateMemory(int **pptr) {
+    *pptr = (int*)malloc(sizeof(int)); // pptr이 가리키는 곳(ptr)에 메모리 주소를 할당
+}
+
+int main() {
+    int *ptr = NULL;
+
+    allocateMemory(&ptr); // ptr의 주소를 전달
+
+    if (ptr == NULL) {
+        return 1;
+    }
+
+    *ptr = 10;
+    printf("할당된 메모리의 값: %d\n", *ptr);
+
+    free(ptr);
+
+    return 0;
+}
+```
+
+### 함수 포인터
+
+함수 포인터는 함수의 시작 주소를 저장하는 포인터입니다. 이를 이용해 함수를 다른 함수의 인자로 전달하거나, 상황에 따라 다른 함수를 호출하게 만들 수 있습니다.
+
+**예시:**
+```c
+#include <stdio.h>
+
+int add(int a, int b) { return a + b; }
+int subtract(int a, int b) { return a - b; }
+
+int main() {
+    int (*fp)(int, int); // int형 인자 두 개를 받고 int를 반환하는 함수 포인터 선언
+    int result;
+
+    fp = add; // 함수 포인터에 add 함수의 주소를 할당
+    result = fp(10, 5);
+    printf("add 결과: %d\n", result);
+
+    fp = subtract; // 함수 포인터에 subtract 함수의 주소를 할당
+    result = fp(10, 5);
+    printf("subtract 결과: %d\n", result);
+
+    return 0;
+}
+```
+ 
